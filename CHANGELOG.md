@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.5 — 2026-07-15
+- Full Disk Access prompt and Preferences window now open centered over the
+  main window
+
 ## 1.3.4 — 2026-07-15
 - Launch check for Full Disk Access: if missing, a dialog explains which
   features need it (shell box, protected folders) and offers to open the
