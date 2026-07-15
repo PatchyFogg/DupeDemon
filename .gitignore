@@ -1,0 +1,12 @@
+# build output
+build/
+dist/
+*.dmg
+build_icon.iconset/
+
+# python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
