@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0 — 2026-07-15
+- Built-in uninstaller: Preferences → "Uninstall Dupe Demon…" lists every file
+  the app put on your system (the .app, Application Support, preferences,
+  saved state, caches, pre-rename leftovers), moves it all to the Trash
+  (restorable), and quits
+
 ## 1.3.5 — 2026-07-15
 - Full Disk Access prompt and Preferences window now open centered over the
   main window

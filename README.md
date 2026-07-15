@@ -45,6 +45,8 @@ Optional HEIC/HEIF support for iPhone photos: `python3 -m pip install pillow-hei
   in its own window. ⚠️ It runs real terminal commands (a one-time warning
   explains this before your first command — `rm` does not use the Trash).
 - **CSV export** of scan results.
+- **Built-in uninstaller** — Preferences → *Uninstall Dupe Demon…* shows every
+  file the app owns, moves it all to the Trash, and quits. No orphaned files.
 
 ## Preferences (⌘,)
 
