@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1 — 2026-07-15
+- Clicking the Dock icon now restores the window after minimizing
+- Stop button also stops results processing (keeps the groups already shown,
+  status reports "Stopped — showing first N of M groups")
+- Progress bar shows overall progress: it no longer resets while re-rendering
+  results after a delete
+
 ## 1.4.0 — 2026-07-15
 - Built-in uninstaller: Preferences → "Uninstall Dupe Demon…" lists every file
   the app put on your system (the .app, Application Support, preferences,
