@@ -42,7 +42,8 @@ Optional HEIC/HEIF support for iPhone photos: `python3 -m pip install pillow-hei
   processing, with live status text.
 - **Built-in shell box** — a `$` field next to the Trash button for quick
   commands like `rm -rf ~/.Trash/*` after a cleanup. Multi-line output opens
-  in its own window.
+  in its own window. ⚠️ It runs real terminal commands (a one-time warning
+  explains this before your first command — `rm` does not use the Trash).
 - **CSV export** of scan results.
 
 ## Preferences (⌘,)

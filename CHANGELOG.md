@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.3 — 2026-07-15
+- One-time warning before the first shell-box command: it runs real terminal
+  commands with no undo (rm doesn't use the Trash); Cancel blocks the command
+
 ## 1.3.2 — 2026-07-15
 - Shell box now shows a greyed "enter shell commands…" placeholder so its
   purpose is obvious; clears on click, never executes as a command
