@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 — 2026-07-15
+- Persistent hash cache (SQLite, Application Support): re-scans skip files
+  whose size and modification time are unchanged — warm re-scans of big
+  libraries read almost nothing. Edited/replaced files re-hash automatically.
+- Cache file is owner-only (0600); Preferences has a "Use hash cache" toggle
+  and a "Clear Cache" button showing its size; the uninstaller removes it
+
 ## 1.4.1 — 2026-07-15
 - Clicking the Dock icon now restores the window after minimizing
 - Stop button also stops results processing (keeps the groups already shown,

@@ -63,6 +63,7 @@ Stored in `~/Library/Application Support/DupeDemon/preferences.json`.
 | Minimum file size | Skip icons and thumbnails |
 | File types | Comma-separated extension list |
 | Worker threads / thumbnail size | Performance and display tuning |
+| Use hash cache | Persists hashes (SQLite) so re-scans skip unchanged files; Clear Cache button included |
 
 > First time you move files to the Trash, macOS asks permission for the app to
 > control Finder — click **OK**.
