@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2 — 2026-07-15
+- Shell box now shows a greyed "enter shell commands…" placeholder so its
+  purpose is obvious; clears on click, never executes as a command
+
 ## 1.3.1 — 2026-07-15
 - Window now opens at ~90% of the screen, centered (was a fixed 1080×760)
 
