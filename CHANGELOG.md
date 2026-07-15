@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.1 — 2026-07-15
+- Window now opens at ~90% of the screen, centered (was a fixed 1080×760)
+
 ## 1.3.0 — 2026-07-15
 - Renamed to **Dupe Demon** (was Duplicate Photo Finder), new icon, versioned
   app bundle; existing preferences migrate automatically
