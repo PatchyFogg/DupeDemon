@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 — 2026-07-15
+- Matching status now warns "this can take several minutes" so long matches
+  on large libraries don't read as a freeze
+
 ## 1.6.1 — 2026-07-15
 - Fixed similar-image scans appearing frozen after "Analyzed…": the matching
   phase now reports live status ("Matching similar images… X%"), collapses
