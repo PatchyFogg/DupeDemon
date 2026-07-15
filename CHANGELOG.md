@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.1 — 2026-07-15
+- Fixed similar-image scans appearing frozen after "Analyzed…": the matching
+  phase now reports live status ("Matching similar images… X%"), collapses
+  identical hash signatures before comparing (dupe-heavy libraries match in
+  milliseconds instead of minutes), and honors Stop throughout
+
 ## 1.6.0 — 2026-07-15
 - Fixed progressive slowdown/memory growth on large scans (app previously got
   slower the more results it processed, until unusable):
