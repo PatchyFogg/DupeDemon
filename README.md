@@ -35,7 +35,8 @@ Optional HEIC/HEIF support for iPhone photos: `python3 -m pip install pillow-hei
   original). Other keep rules: newest, oldest, largest, smallest, first.
 - **Visual review** — thumbnail groups sorted by reclaimable space, with
   dimensions, size, and date. Double-click to open, click the path to reveal
-  in Finder.
+  in Finder. Results are paged ("Show More Groups") so huge libraries stay
+  fast; Auto-Select and Trash always cover the full result set.
 - **Safe deletion** — files go to the macOS Trash (recoverable), and the app
   never lets you trash *every* copy in a group.
 - **Progress for everything** — the bar tracks image analysis and results

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.6.0 — 2026-07-15
+- Fixed progressive slowdown/memory growth on large scans (app previously got
+  slower the more results it processed, until unusable):
+  - Results are paged — 40 groups at a time with a "Show More Groups" button,
+    so widget and thumbnail memory stays bounded no matter the library size
+  - Scroll-region updates are coalesced instead of recalculated per widget
+  - Thumbnails decode JPEGs at reduced resolution (much faster, less RAM)
+  - Removed the matcher's seen-pair set, which could balloon to GBs on
+    similar-heavy libraries
+- Selection now covers all groups, rendered or not: Auto-Select + Trash works
+  on the entire result set without paging through it; the keep-one-per-group
+  guard applies to unrendered groups too
+
 ## 1.5.0 — 2026-07-15
 - Persistent hash cache (SQLite, Application Support): re-scans skip files
   whose size and modification time are unchanged — warm re-scans of big
