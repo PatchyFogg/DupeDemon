@@ -64,6 +64,10 @@ Stored in `~/Library/Application Support/DupeDemon/preferences.json`.
 
 > First time you move files to the Trash, macOS asks permission for the app to
 > control Finder — click **OK**.
+>
+> At launch, Dupe Demon checks for **Full Disk Access** — without it, the shell
+> box can't see protected folders like `~/.Trash` (commands there fail
+> silently). The prompt can open the right System Settings pane for you.
 
 ## Development
 

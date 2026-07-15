@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.4 — 2026-07-15
+- Launch check for Full Disk Access: if missing, a dialog explains which
+  features need it (shell box, protected folders) and offers to open the
+  System Settings pane — with Later / Don't Ask Again options
+
 ## 1.3.3 — 2026-07-15
 - One-time warning before the first shell-box command: it runs real terminal
   commands with no undo (rm doesn't use the Trash); Cancel blocks the command
