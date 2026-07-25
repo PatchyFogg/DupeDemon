@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.0 — 2026-07-25
+- **Drag & drop**: drop folders (or files — their parent folder is added)
+  from Finder anywhere on the window. Folder list highlights while dragging;
+  status bar reports what was added or skipped
+
 ## 1.6.2 — 2026-07-15
 - Matching status now warns "this can take several minutes" so long matches
   on large libraries don't read as a freeze

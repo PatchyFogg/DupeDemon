@@ -1,12 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_all
+
+_dnd_datas, _dnd_binaries, _dnd_hidden = collect_all('tkinterdnd2')
 
 a = Analysis(
     ['dupe_demon.py'],
     pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
+    binaries=_dnd_binaries,
+    datas=_dnd_datas,
+    hiddenimports=_dnd_hidden + ['tkinterdnd2'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

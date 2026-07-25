@@ -1124,10 +1124,7 @@ def build_gui():
             progress_frame.pack(fill="x")
             self.progress = ttk.Progressbar(progress_frame, mode="determinate")
             self.progress.pack(fill="x", side="left", expand=True)
-            self.status_label = ttk.Label(
-                progress_frame,
-                text="Ready. Drag folders here." if _DND_AVAILABLE else "Ready.",
-                width=46, anchor="w")
+            self.status_label = ttk.Label(progress_frame, text="Ready.", width=46, anchor="w")
             self.status_label.pack(side="right", padx=(10, 0))
 
             # results area: scrollable canvas

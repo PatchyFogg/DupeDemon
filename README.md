@@ -6,7 +6,7 @@
 near-duplicate photos — resized, re-saved, re-compressed, even rotated copies —
 shows them side by side, marks the junk automatically, and keeps the best one.
 
-Version **1.3.0** · Python 3 / Tkinter / Pillow · macOS
+Version **1.7.0** · Python 3 / Tkinter / Pillow · macOS
 
 ## Install
 
@@ -23,8 +23,13 @@ python3 dupe_demon.py
 
 Optional HEIC/HEIF support for iPhone photos: `python3 -m pip install pillow-heif`
 
+Optional drag-and-drop from Finder: `python3 -m pip install tkinterdnd2`
+(already bundled in the release DMG; the app still runs without it, minus DnD)
+
 ## Features
 
+- **Drag & drop** — drop folders (or files, whose parent folder is added)
+  from Finder anywhere on the window
 - **Two scan engines**
   - *Similar images* — perceptual difference-hash; catches resized, re-encoded,
     edited, and (optionally) rotated copies
