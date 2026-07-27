@@ -6,7 +6,7 @@
 near-duplicate photos — resized, re-saved, re-compressed, even rotated copies —
 shows them side by side, marks the junk automatically, and keeps the best one.
 
-Version **1.7.0** · Python 3 / Tkinter / Pillow · macOS
+Version **1.8.0** · Python 3 / Tkinter / Pillow · macOS
 
 ## Install
 
@@ -30,6 +30,9 @@ Optional drag-and-drop from Finder: `python3 -m pip install tkinterdnd2`
 
 - **Drag & drop** — drop folders (or files, whose parent folder is added)
   from Finder anywhere on the window
+- **Quick Look & Compare** — click any thumbnail for macOS Quick Look
+  preview; each group's *Compare…* button opens a side-by-side window with
+  larger images, metadata, and the keeper highlighted
 - **Two scan engines**
   - *Similar images* — perceptual difference-hash; catches resized, re-encoded,
     edited, and (optionally) rotated copies

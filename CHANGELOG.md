@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.0 — 2026-07-27
+- **Quick Look**: click any result thumbnail to preview it in the macOS
+  Quick Look panel (double-click still opens in the default app)
+- **Compare…** button on every group — opens a side-by-side window with
+  larger images, dimensions, size, date, and path per file; the keeper
+  (per the current rule) is highlighted in green; per-image Quick Look /
+  Open / Reveal buttons
+
 ## 1.7.0 — 2026-07-25
 - **Drag & drop**: drop folders (or files — their parent folder is added)
   from Finder anywhere on the window. Folder list highlights while dragging;
