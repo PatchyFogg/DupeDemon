@@ -6,7 +6,7 @@
 near-duplicate photos — resized, re-saved, re-compressed, even rotated copies —
 shows them side by side, marks the junk automatically, and keeps the best one.
 
-Version **1.8.0** · Python 3 / Tkinter / Pillow · macOS
+Version **1.9.0** · Python 3 / Tkinter / Pillow · macOS
 
 ## Install
 
@@ -53,7 +53,12 @@ Optional drag-and-drop from Finder: `python3 -m pip install tkinterdnd2`
   commands like `rm -rf ~/.Trash/*` after a cleanup. Multi-line output opens
   in its own window. ⚠️ It runs real terminal commands (a one-time warning
   explains this before your first command — `rm` does not use the Trash).
-- **CSV export** of scan results.
+- **Move Selected to…** — safer alternative to Trash: pick any folder and
+  selected files are moved there (with collision-safe renaming) instead of
+  trashed. Handy for "review pile" workflows.
+- **Confidence per group** — each group's header shows how similar its
+  members are (100% for exact matches, actual pairwise % for perceptual
+  matches — the worst-case among all pairs, so "at least this alike").
 - **Built-in uninstaller** — Preferences → *Uninstall Dupe Demon…* shows every
   file the app owns, moves it all to the Trash, and quits. No orphaned files.
 

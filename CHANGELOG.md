@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.9.0 — 2026-07-30
+- **Confidence % per group** — each group header now shows how similar its
+  members are (100% for exact/byte-identical matches; the actual worst-case
+  pairwise similarity for perceptual matches). Also shown in the Compare
+  window title and footer
+- **Move Selected to…** — new button beside Trash: pick any folder and
+  the selected files are moved (not trashed), with collision-safe renaming
+  (`name (2).jpg`, etc.). A safer alternative for "review pile" workflows
+- **Compare window sizing fixed** — every column is now a uniform
+  fixed-size cell, so mixed portrait/landscape images no longer make the
+  columns ragged; window is capped to screen and centered
+- **Removed**: Export CSV (unused)
+
 ## 1.8.0 — 2026-07-27
 - **Quick Look**: click any result thumbnail to preview it in the macOS
   Quick Look panel (double-click still opens in the default app)
