@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.1 — 2026-08-01
+- Main window now opens larger by default (98% × 96% of screen)
+- **Clear Cache** button on the main toolbar (shows current cache size).
+  Preferences still has one too; both stay in sync
+
 ## 1.9.0 — 2026-07-30
 - **Confidence % per group** — each group header now shows how similar its
   members are (100% for exact/byte-identical matches; the actual worst-case
