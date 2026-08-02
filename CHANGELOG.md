@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.0 — 2026-08-02
+- **Split layout**: main window is now a resizable 30/70 split — folders
+  list on the left (finally sized to show more than 3 rows), photos on
+  the right. Drag the sash to adjust
+
 ## 1.9.1 — 2026-08-01
 - Main window now opens larger by default (98% × 96% of screen)
 - **Clear Cache** button on the main toolbar (shows current cache size).

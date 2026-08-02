@@ -6,7 +6,7 @@
 near-duplicate photos — resized, re-saved, re-compressed, even rotated copies —
 shows them side by side, marks the junk automatically, and keeps the best one.
 
-Version **1.9.0** · Python 3 / Tkinter / Pillow · macOS
+Version **1.10.0** · Python 3 / Tkinter / Pillow · macOS
 
 ## Install
 
