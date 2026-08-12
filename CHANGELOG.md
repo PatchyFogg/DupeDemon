@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.11.0 — 2026-08-03
+- **Sort By** dropdown at the top of the results pane:
+  - Reclaimable size (largest) — default
+  - Confidence (weakest first) — review shaky matches first
+  - Confidence (strongest first)
+  - Group size (most files)
+  - Total size (largest)
+  Re-sorting re-renders in place and preserves your current selection
+
 ## 1.10.0 — 2026-08-02
 - **Split layout**: main window is now a resizable 30/70 split — folders
   list on the left (finally sized to show more than 3 rows), photos on
