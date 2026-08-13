@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.12.0 — 2026-08-04
+- **Source / Reference folders** (dupeGuru-style):
+  - Each folder in the sidebar has a Type — **Source** (files can be
+    deleted) or **Reference** (files are protected, never deleted)
+  - New "Toggle Source ↔ Reference" button; double-click any folder row
+    to flip its type
+  - Files in Reference folders always outrank Source files for "keeper"
+    selection; their checkbox is disabled and shows a 🔒 badge
+  - Groups where every file is in a Reference folder are hidden
+    (nothing actionable)
+  - Compare window frames Reference files in blue with a
+    "Reference — always kept" label
+  - Drag-and-dropped folders default to Source; toggle after if needed
+
 ## 1.11.0 — 2026-08-03
 - **Sort By** dropdown at the top of the results pane:
   - Reclaimable size (largest) — default
