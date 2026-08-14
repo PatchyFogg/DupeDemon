@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.1 — 2026-08-04
+- Worker thread cap raised from 32 to 128 (Preferences → Performance).
+  Handy on machines with plenty of RAM
+
 ## 1.12.0 — 2026-08-04
 - **Source / Reference folders** (dupeGuru-style):
   - Each folder in the sidebar has a Type — **Source** (files can be
