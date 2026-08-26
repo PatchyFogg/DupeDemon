@@ -1,4 +1,4 @@
-# Dupe Demon 😈
+# Dupe Demon
 
 <img src="assets/icon.png" width="128" align="right" alt="Dupe Demon icon">
 
@@ -6,7 +6,7 @@
 near-duplicate photos — resized, re-saved, re-compressed, even rotated copies —
 shows them side by side, marks the junk automatically, and keeps the best one.
 
-Version **1.10.0** · Python 3 / Tkinter / Pillow · macOS
+Version **1.13.3** · Python 3 / Tkinter / Pillow · macOS
 
 ## Install
 
@@ -28,37 +28,41 @@ Optional drag-and-drop from Finder: `python3 -m pip install tkinterdnd2`
 
 ## Features
 
-- **Drag & drop** — drop folders (or files, whose parent folder is added)
-  from Finder anywhere on the window
-- **Quick Look & Compare** — click any thumbnail for macOS Quick Look
-  preview; each group's *Compare…* button opens a side-by-side window with
-  larger images, metadata, and the keeper highlighted
 - **Two scan engines**
   - *Similar images* — perceptual difference-hash; catches resized, re-encoded,
     edited, and (optionally) rotated copies
   - *Exact duplicates* — byte-for-byte content match (size → partial SHA-256 →
     full SHA-256), fast on large libraries
+- **Source / Reference / Off folders** — mark each folder as **Source** (files
+  can be deleted), **Reference** (files are protected, never deleted), or
+  **Off** (excluded from scans entirely). Double-click a row to cycle.
+- **Drag & drop** — drop folders (or files, whose parent folder is added)
+  from Finder onto the folder list
+- **Quick Look & Compare** — click any thumbnail for macOS Quick Look
+  preview; each group's *Compare* button opens a side-by-side window with
+  larger images, metadata, and the keeper highlighted
 - **Automatic marking** — after every scan, duplicates are pre-selected, keeping
   the **best copy** of each group (highest resolution → largest file → oldest
   original). Other keep rules: newest, oldest, largest, smallest, first.
-- **Visual review** — thumbnail groups sorted by reclaimable space, with
-  dimensions, size, and date. Double-click to open, click the path to reveal
-  in Finder. Results are paged ("Show More Groups") so huge libraries stay
-  fast; Auto-Select and Trash always cover the full result set.
+- **Per-group controls** — Select All, Deselect All, and Skip per group.
+  Skip removes a group from results without touching the files.
+- **Sort results** — by reclaimable size, confidence (weakest/strongest first),
+  group size, or total size
+- **Confidence per group** — each group's header shows how similar its
+  members are (100 % for exact matches, actual pairwise % for perceptual
+  matches — the worst-case among all pairs)
+- **Auto-loading results** — results load automatically as you scroll, no
+  paging buttons needed. Memory stays bounded regardless of library size.
 - **Safe deletion** — files go to the macOS Trash (recoverable), and the app
   never lets you trash *every* copy in a group.
-- **Progress for everything** — the bar tracks image analysis and results
-  processing, with live status text.
-- **Built-in shell box** — a `$` field next to the Trash button for quick
-  commands like `rm -rf ~/.Trash/*` after a cleanup. Multi-line output opens
-  in its own window. ⚠️ It runs real terminal commands (a one-time warning
-  explains this before your first command — `rm` does not use the Trash).
 - **Move Selected to…** — safer alternative to Trash: pick any folder and
   selected files are moved there (with collision-safe renaming) instead of
   trashed. Handy for "review pile" workflows.
-- **Confidence per group** — each group's header shows how similar its
-  members are (100% for exact matches, actual pairwise % for perceptual
-  matches — the worst-case among all pairs, so "at least this alike").
+- **Persistent hash cache** — (SQLite, Application Support) re-scans skip
+  files whose size and modification time are unchanged. Optional auto-clear
+  on exit (default on). Clear Cache button on the toolbar shows current size.
+- **Built-in shell box** — a `$` field next to the Trash button for quick
+  commands. A one-time warning explains this before your first command.
 - **Built-in uninstaller** — Preferences → *Uninstall Dupe Demon…* shows every
   file the app owns, moves it all to the Trash, and quits. No orphaned files.
 
@@ -76,8 +80,10 @@ Stored in `~/Library/Application Support/DupeDemon/preferences.json`.
 | Subfolders / hidden files / symlinks | Controls the folder walk |
 | Minimum file size | Skip icons and thumbnails |
 | File types | Comma-separated extension list |
-| Worker threads / thumbnail size | Performance and display tuning |
-| Use hash cache | Persists hashes (SQLite) so re-scans skip unchanged files; Clear Cache button included |
+| Worker threads | Performance tuning (each worker spawns 10 threads) |
+| Thumbnail size | Display tuning |
+| Use hash cache | Persists hashes so re-scans skip unchanged files; Clear Cache button included |
+| Clear cache on exit | Wipes the hash cache when the app closes (default on) |
 
 > First time you move files to the Trash, macOS asks permission for the app to
 > control Finder — click **OK**.
@@ -86,21 +92,33 @@ Stored in `~/Library/Application Support/DupeDemon/preferences.json`.
 > box can't see protected folders like `~/.Trash` (commands there fail
 > silently). The prompt can open the right System Settings pane for you.
 
+## Privacy
+
+Dupe Demon is **100 % offline**. It makes no network requests, sends no
+telemetry, and uploads nothing. All data stays on your Mac:
+
+| What | Where | How to wipe |
+|---|---|---|
+| Preferences | `~/Library/Application Support/DupeDemon/preferences.json` | Delete the file, or use the built-in uninstaller |
+| Hash cache | `~/Library/Application Support/DupeDemon/hash_cache.db` | Clear Cache button, or enable "Clear cache on exit" |
+| Window state | macOS Saved Application State | Reset via System Settings or the uninstaller |
+
+The built-in uninstaller (Preferences → *Uninstall Dupe Demon…*) removes everything in one step.
+
 ## Development
 
 ```bash
 python3 dupe_demon.py --selftest    # engine test suite (no GUI needed)
 ```
 
-Build the app and DMG (PyInstaller):
+Build the app and DMG:
 
 ```bash
-pyinstaller --windowed --name "Dupe Demon" --icon app_icon.icns \
-            --osx-bundle-identifier com.saltz.dupedemon dupe_demon.py
+chmod +x build.sh && ./build.sh
 ```
 
-Then stage `dist/Dupe Demon.app` with an `/Applications` symlink and wrap it
-with `hdiutil create`.
+The build script finds a usable Python 3.9+, creates a venv, runs PyInstaller,
+verifies the bundle has no Homebrew leaks, and produces a drag-install DMG.
 
 ## License
 

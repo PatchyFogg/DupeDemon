@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.13.3 — 2026-08-18
+- Matte black "Add folders here" placeholder in the folder list when empty
+- D&D white overlay now shows "Drop folders here" text
+- Placeholder auto-hides when folders are added, reappears when all removed
+
+## 1.13.2 — 2026-08-18
+- "Clear cache on exit" option in Preferences (on by default)
+
+## 1.13.1 — 2026-08-18
+- Worker threads now scale 10× (1 worker = 10 threads)
+- D&D white overlay scoped to receiving panel only (Folders or Results)
+
+## 1.13.0 — 2026-08-18
+- Spinning pie chart replaces progress bar
+- Results auto-load on scroll (no more "Show More" button)
+- Folder toggle now cycles Source → Reference → Off; Off folders
+  are skipped entirely during scans
+- Per-group Select All / Deselect All buttons
+- Per-group Skip button removes group from results without touching files
+- "Remove" button renamed to "Remove from List" for clarity
+- Scan-with-no-folders warning moved from modal dialog to status bar
+- Drag-and-drop visual feedback: window shows a white overlay while
+  files are being dragged over it, reverts to normal on drop
+
 ## 1.12.1 — 2026-08-04
 - Worker thread cap raised from 32 to 128 (Preferences → Performance).
   Handy on machines with plenty of RAM

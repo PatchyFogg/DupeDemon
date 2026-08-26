@@ -51,7 +51,7 @@ except ImportError:
     pass
 
 APP_NAME = "Dupe Demon"
-__version__ = "1.13.3"
+__version__ = "1.13.2"
 APP_SUPPORT_DIR = Path.home() / "Library" / "Application Support" / "DupeDemon"
 PREFS_FILE = APP_SUPPORT_DIR / "preferences.json"
 CACHE_FILE = APP_SUPPORT_DIR / "hash_cache.db"
@@ -1176,144 +1176,11 @@ def build_gui():
             self._register_drop_targets()
             self._poll_queue()
             self.createcommand("tk::mac::Quit", self._quit)
+            # restore the window when the Dock icon is clicked while minimized
             self.createcommand("tk::mac::ReopenApplication", self._reopen)
-            self.createcommand("tk::mac::ShowPreferences", self.open_preferences)
             self.bind("<Command-comma>", lambda e: self.open_preferences())
             self.bind("<Command-o>", lambda e: self.add_folder())
-            self.bind("<Command-r>", lambda e: self.remove_folder())
-            self.bind("<Command-Return>", lambda e: self.start_scan())
-
-            self._build_menubar()
             self.after(700, self._maybe_prompt_full_disk_access)
-
-        # ---------------- menu bar ----------------
-        def _build_menubar(self):
-            menubar = tk.Menu(self)
-
-            file_menu = tk.Menu(menubar, tearoff=0)
-            file_menu.add_command(label="Add Folder…", accelerator="⌘O",
-                                 command=self.add_folder)
-            file_menu.add_command(label="Remove from List", accelerator="⌘R",
-                                 command=self.remove_folder)
-            file_menu.add_separator()
-            file_menu.add_command(label="Scan", accelerator="⌘↩",
-                                 command=self.start_scan)
-            file_menu.add_command(label="Stop", command=self.stop_scan)
-            file_menu.add_separator()
-            file_menu.add_command(label="Clear Cache", command=self.clear_cache_action)
-            file_menu.add_separator()
-            file_menu.add_command(label="Uninstall Dupe Demon…",
-                                 command=self.uninstall_app)
-            menubar.add_cascade(label="File", menu=file_menu)
-
-            edit_menu = tk.Menu(menubar, tearoff=0)
-            edit_menu.add_command(label="Auto-Select", command=self.auto_select)
-            edit_menu.add_command(label="Clear Selection", command=self.clear_selection)
-            edit_menu.add_separator()
-            edit_menu.add_command(label="Move Selected to Trash",
-                                 command=self.trash_selected)
-            edit_menu.add_command(label="Move Selected to…",
-                                 command=self.move_selected_to_folder)
-            menubar.add_cascade(label="Edit", menu=edit_menu)
-
-            help_menu = tk.Menu(menubar, tearoff=0)
-            help_menu.add_command(
-                label=f"{APP_NAME} Help",
-                command=lambda: self._show_help())
-            help_menu.add_separator()
-            help_menu.add_command(
-                label=f"About {APP_NAME}",
-                command=lambda: self._show_about())
-            menubar.add_cascade(label="Help", menu=help_menu)
-
-            self.config(menu=menubar)
-
-        def _show_help(self):
-            win = tk.Toplevel(self)
-            win.title(f"{APP_NAME} Help")
-            win.geometry("560x520")
-            win.transient(self)
-
-            body = ttk.Frame(win, padding=16)
-            body.pack(fill="both", expand=True)
-
-            text = tk.Text(body, wrap="word", relief="flat", padx=8, pady=8,
-                          font=("Helvetica", 12), highlightthickness=0)
-            scroll = ttk.Scrollbar(body, orient="vertical", command=text.yview)
-            text.configure(yscrollcommand=scroll.set)
-            scroll.pack(side="right", fill="y")
-            text.pack(side="left", fill="both", expand=True)
-
-            text.tag_configure("h1", font=("Helvetica", 14, "bold"),
-                              spacing3=6, spacing1=10)
-            text.tag_configure("body", font=("Helvetica", 12), spacing3=8)
-
-            sections = [
-                ("Getting started",
-                 "Add folders with “+ Add Folder…” or by dragging them "
-                 "onto the folder list from Finder. Click Scan to search for "
-                 "duplicate or similar photos."),
-                ("Source, Reference, and Off",
-                 "Double-click a folder (or use “Toggle Source / Reference / "
-                 "Off”) to change its role. Source folders can have files "
-                 "deleted. Reference folders are protected and never deleted — "
-                 "use these for a master photo library. Off folders are skipped "
-                 "entirely during scans."),
-                ("Reviewing results",
-                 "Each group shows the matching photos with a confidence "
-                 "percentage. Click a thumbnail for Quick Look, or use Compare "
-                 "for a side-by-side view. Select All, Deselect All, and Skip "
-                 "work per group; Skip removes the group from view without "
-                 "touching any files."),
-                ("Deleting duplicates",
-                 "Selected files can be moved to the Trash (recoverable) or "
-                 "moved to another folder. Dupe Demon never lets you select "
-                 "every copy in a group — there's always at least one keeper."),
-                ("Cache",
-                 "Dupe Demon remembers file hashes so re-scanning a library you "
-                 "already scanned is fast. Clear the cache anytime from the "
-                 "toolbar or File menu, or turn on “Clear cache on exit” "
-                 "in Preferences."),
-                ("Privacy",
-                 "Dupe Demon is fully offline. No network requests, no "
-                 "telemetry. Everything is stored in "
-                 "~/Library/Application Support/DupeDemon. Use File → "
-                 "Uninstall Dupe Demon… to remove all app data."),
-            ]
-            for title, body_text in sections:
-                text.insert("end", title + "\n", "h1")
-                text.insert("end", body_text + "\n\n", "body")
-            text.configure(state="disabled")
-
-            ttk.Button(win, text="Close", command=win.destroy).pack(pady=(0, 12))
-
-            win.update_idletasks()
-            w, h = win.winfo_reqwidth(), win.winfo_reqheight()
-            x = self.winfo_x() + (self.winfo_width() - w) // 2
-            y = self.winfo_y() + (self.winfo_height() - h) // 2
-            win.geometry(f"+{x}+{y}")
-
-        def _show_about(self):
-            about = tk.Toplevel(self)
-            about.title(f"About {APP_NAME}")
-            about.resizable(False, False)
-            about.transient(self)
-            about.grab_set()
-            f = ttk.Frame(about, padding=24)
-            f.pack()
-            ttk.Label(f, text=APP_NAME,
-                      font=("Helvetica", 18, "bold")).pack()
-            ttk.Label(f, text=f"Version {__version__}").pack(pady=(4, 0))
-            ttk.Label(f, text="Duplicate photo finder for macOS",
-                      foreground="gray").pack(pady=(2, 0))
-            ttk.Label(f, text="MIT License", foreground="gray").pack(pady=(2, 0))
-            ttk.Button(f, text="OK", command=about.destroy).pack(pady=(16, 0))
-            about.update_idletasks()
-            w = about.winfo_reqwidth()
-            h = about.winfo_reqheight()
-            x = self.winfo_x() + (self.winfo_width() - w) // 2
-            y = self.winfo_y() + (self.winfo_height() - h) // 2
-            about.geometry(f"+{x}+{y}")
 
         # ---------------- drag & drop ----------------
         def _register_drop_targets(self):
@@ -1322,7 +1189,7 @@ def build_gui():
             self._drop_overlays = {}
             targets = [
                 (self.folder_list, self.folder_frame),
-                (self._folder_placeholder, self.folder_frame),
+                (self.canvas, self.results_outer),
             ]
             for w, overlay_parent in targets:
                 try:
@@ -1340,9 +1207,23 @@ def build_gui():
                 self.status_label.configure(text="Drop to add folders…")
             except Exception:
                 pass
+            if parent not in self._drop_overlays:
+                overlay = tk.Frame(parent, background="white")
+                overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+                self._drop_overlays[parent] = overlay
             return event.action
 
         def _on_drop_leave(self, event, parent=None):
+            if parent is not None:
+                overlay = self._drop_overlays.pop(parent, None)
+                if overlay is not None:
+                    overlay.place_forget()
+                    overlay.destroy()
+            else:
+                for p, overlay in list(self._drop_overlays.items()):
+                    overlay.place_forget()
+                    overlay.destroy()
+                self._drop_overlays.clear()
             return event.action
 
         def _on_drop(self, event):
@@ -1390,12 +1271,6 @@ def build_gui():
                 return "⏸ Off"
             return "Source"
 
-        def _update_folder_placeholder(self):
-            if self.folders:
-                self._folder_placeholder.place_forget()
-            else:
-                self._folder_placeholder.place(relx=0, rely=0, relwidth=1, relheight=1)
-
         def _add_folder_entry(self, path, kind="source"):
             entry = {"path": path, "kind": kind}
             self.folders.append(entry)
@@ -1403,7 +1278,6 @@ def build_gui():
                 "", "end", iid=path,
                 values=(self._kind_display(kind), path),
                 tags=(kind,) if kind in ("reference", "off") else ())
-            self._update_folder_placeholder()
 
         def _refresh_folder_row(self, path):
             for e in self.folders:
@@ -1502,9 +1376,9 @@ def build_gui():
             self.progress.pack(side="left", padx=(0, 6))
             self.status_label = ttk.Label(
                 progress_frame,
-                text="Ready.",
+                text="Ready. Drag folders here." if _DND_AVAILABLE else "Ready.",
                 width=46, anchor="w")
-            self.status_label.pack(side="left", padx=(0, 0))
+            self.status_label.pack(side="right", padx=(10, 0))
 
             # 30/70 split: folders on the left, results on the right
             self.split = ttk.PanedWindow(self, orient="horizontal")
@@ -1535,13 +1409,6 @@ def build_gui():
             self.folder_list.pack(side="left", fill="both", expand=True)
             self.folder_list.bind("<Double-Button-1>",
                                   lambda e: self.toggle_folder_kind())
-
-            self._folder_placeholder = tk.Frame(tree_wrap, background="#1a1a1a")
-            tk.Label(
-                self._folder_placeholder, text="Add folders here",
-                font=("Helvetica", 14), fg="#808080", bg="#1a1a1a",
-            ).place(relx=0.5, rely=0.5, anchor="center")
-            self._folder_placeholder.place(relx=0, rely=0, relwidth=1, relheight=1)
 
             ftools = ttk.Frame(folder_frame)
             ftools.pack(fill="x", pady=(6, 0))
@@ -1671,7 +1538,6 @@ def build_gui():
             for path in selected:
                 if self.folder_list.exists(path):
                     self.folder_list.delete(path)
-            self._update_folder_placeholder()
 
         def _set_initial_sash(self):
             try:

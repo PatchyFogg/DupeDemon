@@ -51,7 +51,7 @@ except ImportError:
     pass
 
 APP_NAME = "Dupe Demon"
-__version__ = "1.13.3"
+__version__ = "1.13.0"
 APP_SUPPORT_DIR = Path.home() / "Library" / "Application Support" / "DupeDemon"
 PREFS_FILE = APP_SUPPORT_DIR / "preferences.json"
 CACHE_FILE = APP_SUPPORT_DIR / "hash_cache.db"
@@ -63,6 +63,68 @@ if HEIC_SUPPORTED:
     DEFAULT_EXTENSIONS += ["heic", "heif"]
 
 PAIRWISE_LIMIT = 2500      # below this, compare every pair; above, use banding
+
+
+class PieProgress(tk.Canvas):
+    """Spinning pie-chart progress indicator."""
+
+    def __init__(self, master, size=28, bg_color="#e0e0e0", fg_color="#3584e4",
+                 **kw):
+        kw.setdefault("width", size)
+        kw.setdefault("height", size)
+        kw.setdefault("highlightthickness", 0)
+        kw.setdefault("borderwidth", 0)
+        super().__init__(master, **kw)
+        self._size = size
+        self._bg_color = bg_color
+        self._fg_color = fg_color
+        self._value = 0
+        self._maximum = 100
+        self._rotation = 0
+        self._spinning = False
+        self._draw()
+
+    def config(self, **kw):
+        changed = False
+        if "value" in kw:
+            self._value = kw.pop("value")
+            changed = True
+        if "maximum" in kw:
+            self._maximum = max(kw.pop("maximum"), 1)
+            changed = True
+        if kw:
+            super().config(**kw)
+        if changed:
+            if self._value > 0 and not self._spinning:
+                self._spinning = True
+                self._spin()
+            elif self._value <= 0:
+                self._spinning = False
+                self._rotation = 0
+            self._draw()
+
+    configure = config
+
+    def _draw(self):
+        self.delete("all")
+        pad = 2
+        s = self._size - pad * 2
+        self.create_oval(pad, pad, pad + s, pad + s, fill=self._bg_color,
+                         outline="")
+        if self._maximum > 0 and self._value > 0:
+            frac = min(self._value / self._maximum, 1.0)
+            extent = frac * 360
+            start = 90 - self._rotation
+            self.create_arc(pad, pad, pad + s, pad + s, start=start,
+                            extent=-extent, fill=self._fg_color, outline="",
+                            style="pieslice")
+
+    def _spin(self):
+        if not self._spinning:
+            return
+        self._rotation = (self._rotation + 6) % 360
+        self._draw()
+        self.after(30, self._spin)
 
 
 class Group(list):
@@ -107,7 +169,6 @@ class Preferences:
     shell_warning_accepted: bool = False   # one-time warning before first shell command
     ask_full_disk_access: bool = True      # offer to enable Full Disk Access at launch
     use_hash_cache: bool = True            # persist hashes so re-scans skip unchanged files
-    clear_cache_on_exit: bool = True
 
     @classmethod
     def load(cls) -> "Preferences":
@@ -388,7 +449,7 @@ def find_exact_duplicates(files, prefs, progress=None, cancel_event=None, cache=
         # Cached path: full hashes only (cache hits need no file reads at all).
         cached = cache.get_shas([fi for g in candidates for fi in g])
         new_entries = []
-        with ThreadPoolExecutor(max_workers=prefs.worker_threads * 10) as pool:
+        with ThreadPoolExecutor(max_workers=prefs.worker_threads) as pool:
             for same_size in candidates:
                 check_cancel()
                 full = {}
@@ -424,7 +485,7 @@ def find_exact_duplicates(files, prefs, progress=None, cancel_event=None, cache=
             cache.put_shas(new_entries)
         return groups
 
-    with ThreadPoolExecutor(max_workers=prefs.worker_threads * 10) as pool:
+    with ThreadPoolExecutor(max_workers=prefs.worker_threads) as pool:
         for same_size in candidates:
             check_cancel()
             # Partial hash pre-filter (first 64 KB), then full hash.
@@ -494,7 +555,7 @@ def find_similar_images(files, prefs, progress=None, cancel_event=None, cache=No
             to_compute.append(fi)
 
     new_entries = []
-    with ThreadPoolExecutor(max_workers=prefs.worker_threads * 10) as pool:
+    with ThreadPoolExecutor(max_workers=prefs.worker_threads) as pool:
         futures = {
             pool.submit(compute_perceptual_hashes, fi.path, prefs.hash_size,
                         prefs.match_rotated): fi
@@ -668,7 +729,7 @@ def _fill_dimensions(groups, prefs):
             fi.width, fi.height = w, h
         except Exception:
             pass
-    with ThreadPoolExecutor(max_workers=prefs.worker_threads * 10) as pool:
+    with ThreadPoolExecutor(max_workers=prefs.worker_threads) as pool:
         list(pool.map(read_dims, [fi for g in groups for fi in g]))
 
 
@@ -845,65 +906,6 @@ def build_gui():
     except Exception:
         _TkBase = tk.Tk
         _DND_AVAILABLE = False
-
-    class PieProgress(tk.Canvas):
-        def __init__(self, master, size=28, bg_color="#e0e0e0", fg_color="#3584e4",
-                     **kw):
-            kw.setdefault("width", size)
-            kw.setdefault("height", size)
-            kw.setdefault("highlightthickness", 0)
-            kw.setdefault("borderwidth", 0)
-            super().__init__(master, **kw)
-            self._size = size
-            self._bg_color = bg_color
-            self._fg_color = fg_color
-            self._value = 0
-            self._maximum = 100
-            self._rotation = 0
-            self._spinning = False
-            self._draw()
-
-        def config(self, **kw):
-            changed = False
-            if "value" in kw:
-                self._value = kw.pop("value")
-                changed = True
-            if "maximum" in kw:
-                self._maximum = max(kw.pop("maximum"), 1)
-                changed = True
-            if kw:
-                super().config(**kw)
-            if changed:
-                if self._value > 0 and not self._spinning:
-                    self._spinning = True
-                    self._spin()
-                elif self._value <= 0:
-                    self._spinning = False
-                    self._rotation = 0
-                self._draw()
-
-        configure = config
-
-        def _draw(self):
-            self.delete("all")
-            pad = 2
-            s = self._size - pad * 2
-            self.create_oval(pad, pad, pad + s, pad + s, fill=self._bg_color,
-                             outline="")
-            if self._maximum > 0 and self._value > 0:
-                frac = min(self._value / self._maximum, 1.0)
-                extent = frac * 360
-                start = 90 - self._rotation
-                self.create_arc(pad, pad, pad + s, pad + s, start=start,
-                                extent=-extent, fill=self._fg_color, outline="",
-                                style="pieslice")
-
-        def _spin(self):
-            if not self._spinning:
-                return
-            self._rotation = (self._rotation + 6) % 360
-            self._draw()
-            self.after(30, self._spin)
         DND_FILES = None
 
     class PreferencesWindow(tk.Toplevel):
@@ -1043,12 +1045,6 @@ def build_gui():
             self._refresh_cache_button()
             row += 1
 
-            self.clear_on_exit_var = tk.BooleanVar(value=prefs.clear_cache_on_exit)
-            ttk.Checkbutton(body, text="Clear cache on exit",
-                            variable=self.clear_on_exit_var).grid(
-                row=row, column=0, columnspan=2, sticky="w", pady=2)
-            row += 1
-
             ttk.Label(body, text="Thumbnail size:").grid(row=row, column=0, sticky="w", pady=4)
             self.thumb_var = tk.IntVar(value=prefs.thumbnail_size)
             thumb_frame = ttk.Frame(body)
@@ -1111,7 +1107,6 @@ def build_gui():
             self.threads_var.set(str(defaults.worker_threads))
             self.thumb_var.set(defaults.thumbnail_size)
             self.cache_var.set(defaults.use_hash_cache)
-            self.clear_on_exit_var.set(defaults.clear_cache_on_exit)
             self._update_state()
 
         def _save(self):
@@ -1137,7 +1132,6 @@ def build_gui():
             p.extensions = [e for e in exts if e] or list(DEFAULT_EXTENSIONS)
             p.thumbnail_size = self.thumb_var.get()
             p.use_hash_cache = self.cache_var.get()
-            p.clear_cache_on_exit = self.clear_on_exit_var.get()
             p.save()
             self.on_save()
             self.destroy()
@@ -1176,173 +1170,40 @@ def build_gui():
             self._register_drop_targets()
             self._poll_queue()
             self.createcommand("tk::mac::Quit", self._quit)
+            # restore the window when the Dock icon is clicked while minimized
             self.createcommand("tk::mac::ReopenApplication", self._reopen)
-            self.createcommand("tk::mac::ShowPreferences", self.open_preferences)
             self.bind("<Command-comma>", lambda e: self.open_preferences())
             self.bind("<Command-o>", lambda e: self.add_folder())
-            self.bind("<Command-r>", lambda e: self.remove_folder())
-            self.bind("<Command-Return>", lambda e: self.start_scan())
-
-            self._build_menubar()
             self.after(700, self._maybe_prompt_full_disk_access)
-
-        # ---------------- menu bar ----------------
-        def _build_menubar(self):
-            menubar = tk.Menu(self)
-
-            file_menu = tk.Menu(menubar, tearoff=0)
-            file_menu.add_command(label="Add Folder…", accelerator="⌘O",
-                                 command=self.add_folder)
-            file_menu.add_command(label="Remove from List", accelerator="⌘R",
-                                 command=self.remove_folder)
-            file_menu.add_separator()
-            file_menu.add_command(label="Scan", accelerator="⌘↩",
-                                 command=self.start_scan)
-            file_menu.add_command(label="Stop", command=self.stop_scan)
-            file_menu.add_separator()
-            file_menu.add_command(label="Clear Cache", command=self.clear_cache_action)
-            file_menu.add_separator()
-            file_menu.add_command(label="Uninstall Dupe Demon…",
-                                 command=self.uninstall_app)
-            menubar.add_cascade(label="File", menu=file_menu)
-
-            edit_menu = tk.Menu(menubar, tearoff=0)
-            edit_menu.add_command(label="Auto-Select", command=self.auto_select)
-            edit_menu.add_command(label="Clear Selection", command=self.clear_selection)
-            edit_menu.add_separator()
-            edit_menu.add_command(label="Move Selected to Trash",
-                                 command=self.trash_selected)
-            edit_menu.add_command(label="Move Selected to…",
-                                 command=self.move_selected_to_folder)
-            menubar.add_cascade(label="Edit", menu=edit_menu)
-
-            help_menu = tk.Menu(menubar, tearoff=0)
-            help_menu.add_command(
-                label=f"{APP_NAME} Help",
-                command=lambda: self._show_help())
-            help_menu.add_separator()
-            help_menu.add_command(
-                label=f"About {APP_NAME}",
-                command=lambda: self._show_about())
-            menubar.add_cascade(label="Help", menu=help_menu)
-
-            self.config(menu=menubar)
-
-        def _show_help(self):
-            win = tk.Toplevel(self)
-            win.title(f"{APP_NAME} Help")
-            win.geometry("560x520")
-            win.transient(self)
-
-            body = ttk.Frame(win, padding=16)
-            body.pack(fill="both", expand=True)
-
-            text = tk.Text(body, wrap="word", relief="flat", padx=8, pady=8,
-                          font=("Helvetica", 12), highlightthickness=0)
-            scroll = ttk.Scrollbar(body, orient="vertical", command=text.yview)
-            text.configure(yscrollcommand=scroll.set)
-            scroll.pack(side="right", fill="y")
-            text.pack(side="left", fill="both", expand=True)
-
-            text.tag_configure("h1", font=("Helvetica", 14, "bold"),
-                              spacing3=6, spacing1=10)
-            text.tag_configure("body", font=("Helvetica", 12), spacing3=8)
-
-            sections = [
-                ("Getting started",
-                 "Add folders with “+ Add Folder…” or by dragging them "
-                 "onto the folder list from Finder. Click Scan to search for "
-                 "duplicate or similar photos."),
-                ("Source, Reference, and Off",
-                 "Double-click a folder (or use “Toggle Source / Reference / "
-                 "Off”) to change its role. Source folders can have files "
-                 "deleted. Reference folders are protected and never deleted — "
-                 "use these for a master photo library. Off folders are skipped "
-                 "entirely during scans."),
-                ("Reviewing results",
-                 "Each group shows the matching photos with a confidence "
-                 "percentage. Click a thumbnail for Quick Look, or use Compare "
-                 "for a side-by-side view. Select All, Deselect All, and Skip "
-                 "work per group; Skip removes the group from view without "
-                 "touching any files."),
-                ("Deleting duplicates",
-                 "Selected files can be moved to the Trash (recoverable) or "
-                 "moved to another folder. Dupe Demon never lets you select "
-                 "every copy in a group — there's always at least one keeper."),
-                ("Cache",
-                 "Dupe Demon remembers file hashes so re-scanning a library you "
-                 "already scanned is fast. Clear the cache anytime from the "
-                 "toolbar or File menu, or turn on “Clear cache on exit” "
-                 "in Preferences."),
-                ("Privacy",
-                 "Dupe Demon is fully offline. No network requests, no "
-                 "telemetry. Everything is stored in "
-                 "~/Library/Application Support/DupeDemon. Use File → "
-                 "Uninstall Dupe Demon… to remove all app data."),
-            ]
-            for title, body_text in sections:
-                text.insert("end", title + "\n", "h1")
-                text.insert("end", body_text + "\n\n", "body")
-            text.configure(state="disabled")
-
-            ttk.Button(win, text="Close", command=win.destroy).pack(pady=(0, 12))
-
-            win.update_idletasks()
-            w, h = win.winfo_reqwidth(), win.winfo_reqheight()
-            x = self.winfo_x() + (self.winfo_width() - w) // 2
-            y = self.winfo_y() + (self.winfo_height() - h) // 2
-            win.geometry(f"+{x}+{y}")
-
-        def _show_about(self):
-            about = tk.Toplevel(self)
-            about.title(f"About {APP_NAME}")
-            about.resizable(False, False)
-            about.transient(self)
-            about.grab_set()
-            f = ttk.Frame(about, padding=24)
-            f.pack()
-            ttk.Label(f, text=APP_NAME,
-                      font=("Helvetica", 18, "bold")).pack()
-            ttk.Label(f, text=f"Version {__version__}").pack(pady=(4, 0))
-            ttk.Label(f, text="Duplicate photo finder for macOS",
-                      foreground="gray").pack(pady=(2, 0))
-            ttk.Label(f, text="MIT License", foreground="gray").pack(pady=(2, 0))
-            ttk.Button(f, text="OK", command=about.destroy).pack(pady=(16, 0))
-            about.update_idletasks()
-            w = about.winfo_reqwidth()
-            h = about.winfo_reqheight()
-            x = self.winfo_x() + (self.winfo_width() - w) // 2
-            y = self.winfo_y() + (self.winfo_height() - h) // 2
-            about.geometry(f"+{x}+{y}")
 
         # ---------------- drag & drop ----------------
         def _register_drop_targets(self):
             if not _DND_AVAILABLE:
                 return
-            self._drop_overlays = {}
-            targets = [
-                (self.folder_list, self.folder_frame),
-                (self._folder_placeholder, self.folder_frame),
-            ]
-            for w, overlay_parent in targets:
+            for w in (self, self.folder_list, self.canvas):
                 try:
                     w.drop_target_register(DND_FILES)
                     w.dnd_bind("<<Drop>>", self._on_drop)
-                    w.dnd_bind("<<DropEnter>>",
-                               lambda e, p=overlay_parent: self._on_drop_enter(e, p))
-                    w.dnd_bind("<<DropLeave>>",
-                               lambda e, p=overlay_parent: self._on_drop_leave(e, p))
+                    w.dnd_bind("<<DropEnter>>", self._on_drop_enter)
+                    w.dnd_bind("<<DropLeave>>", self._on_drop_leave)
                 except Exception:
                     pass
 
-        def _on_drop_enter(self, event, parent):
+        def _on_drop_enter(self, event):
             try:
                 self.status_label.configure(text="Drop to add folders…")
             except Exception:
                 pass
+            if not hasattr(self, "_drop_overlay") or self._drop_overlay is None:
+                self._drop_overlay = tk.Frame(self, background="white")
+                self._drop_overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
             return event.action
 
-        def _on_drop_leave(self, event, parent=None):
+        def _on_drop_leave(self, event):
+            if hasattr(self, "_drop_overlay") and self._drop_overlay is not None:
+                self._drop_overlay.place_forget()
+                self._drop_overlay.destroy()
+                self._drop_overlay = None
             return event.action
 
         def _on_drop(self, event):
@@ -1390,12 +1251,6 @@ def build_gui():
                 return "⏸ Off"
             return "Source"
 
-        def _update_folder_placeholder(self):
-            if self.folders:
-                self._folder_placeholder.place_forget()
-            else:
-                self._folder_placeholder.place(relx=0, rely=0, relwidth=1, relheight=1)
-
         def _add_folder_entry(self, path, kind="source"):
             entry = {"path": path, "kind": kind}
             self.folders.append(entry)
@@ -1403,7 +1258,6 @@ def build_gui():
                 "", "end", iid=path,
                 values=(self._kind_display(kind), path),
                 tags=(kind,) if kind in ("reference", "off") else ())
-            self._update_folder_placeholder()
 
         def _refresh_folder_row(self, path):
             for e in self.folders:
@@ -1502,16 +1356,15 @@ def build_gui():
             self.progress.pack(side="left", padx=(0, 6))
             self.status_label = ttk.Label(
                 progress_frame,
-                text="Ready.",
+                text="Ready. Drag folders here." if _DND_AVAILABLE else "Ready.",
                 width=46, anchor="w")
-            self.status_label.pack(side="left", padx=(0, 0))
+            self.status_label.pack(side="right", padx=(10, 0))
 
             # 30/70 split: folders on the left, results on the right
             self.split = ttk.PanedWindow(self, orient="horizontal")
             self.split.pack(fill="both", expand=True, padx=12, pady=(4, 6))
 
-            self.folder_frame = ttk.LabelFrame(self.split, text="Folders to scan", padding=6)
-            folder_frame = self.folder_frame
+            folder_frame = ttk.LabelFrame(self.split, text="Folders to scan", padding=6)
 
             tree_wrap = ttk.Frame(folder_frame)
             tree_wrap.pack(fill="both", expand=True)
@@ -1536,13 +1389,6 @@ def build_gui():
             self.folder_list.bind("<Double-Button-1>",
                                   lambda e: self.toggle_folder_kind())
 
-            self._folder_placeholder = tk.Frame(tree_wrap, background="#1a1a1a")
-            tk.Label(
-                self._folder_placeholder, text="Add folders here",
-                font=("Helvetica", 14), fg="#808080", bg="#1a1a1a",
-            ).place(relx=0.5, rely=0.5, anchor="center")
-            self._folder_placeholder.place(relx=0, rely=0, relwidth=1, relheight=1)
-
             ftools = ttk.Frame(folder_frame)
             ftools.pack(fill="x", pady=(6, 0))
             ttk.Button(ftools, text="Toggle Source / Reference / Off",
@@ -1555,8 +1401,7 @@ def build_gui():
             self.split.add(folder_frame, weight=30)
 
             # results area: scrollable canvas
-            self.results_outer = ttk.LabelFrame(self.split, text="Results", padding=4)
-            results_outer = self.results_outer
+            results_outer = ttk.LabelFrame(self.split, text="Results", padding=4)
 
             sort_header = ttk.Frame(results_outer)
             sort_header.pack(fill="x", pady=(0, 4))
@@ -1671,7 +1516,6 @@ def build_gui():
             for path in selected:
                 if self.folder_list.exists(path):
                     self.folder_list.delete(path)
-            self._update_folder_placeholder()
 
         def _set_initial_sash(self):
             try:
@@ -2453,8 +2297,6 @@ def build_gui():
 
         def _quit(self):
             self._cancel_event.set()
-            if self.prefs.clear_cache_on_exit:
-                clear_hash_cache()
             self.destroy()
 
     return App

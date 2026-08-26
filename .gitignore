@@ -1,12 +1,20 @@
 # build output
 build/
 dist/
+release/
 *.dmg
-build_icon.iconset/
+
+# release archives
+*.zip
 
 # python
+.venv/
 __pycache__/
 *.pyc
 
+# build.sh auto-backups (only versioned dupe_demon_vX.Y.Z.py are committed)
+versions/dupe_demon_2*.py
+
 # macOS
 .DS_Store
+build_icon.iconset/
