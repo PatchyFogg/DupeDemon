@@ -1,6 +1,130 @@
 # Changelog
 
+## 1.15.0 — 2026-09-05
+- **New:** Plugin architecture. Drop a single `.py` file into
+  `~/Library/Application Support/DupeDemon/plugins/` that exports a
+  `register(app)` function and it loads automatically on next launch.
+  **Plugins → Manage Plugins…** lists every installed plugin (name,
+  description, enable/disable toggle) without ever executing a disabled
+  plugin's code — metadata is read via static parsing, not import. Core
+  app behavior is untouched by this; it's purely additive.
+
+## 1.14.2 — 2026-09-01
+- **Fix:** Move to Trash never showed a permission prompt at all, and
+  Dupe Demon never appeared in System Settings → Privacy & Security →
+  Automation to grant it manually. Two causes:
+  - The app's Info.plist was missing `NSAppleEventsUsageDescription`.
+    Without that key macOS won't prompt for Apple Events at all (added
+    via the PyInstaller spec's `info_plist`) — necessary but not
+    sufficient on its own.
+  - The build is ad-hoc signed (no paid Developer ID), and that
+    signature's hash changes on every rebuild. macOS TCC ties Automation
+    grants to that hash, and after enough rebuilds during active
+    development it stopped even offering the prompt for this bundle ID —
+    not denied, just never asked. `build.sh` now strips the signature
+    after PyInstaller applies it, matching how the app already needs
+    "right-click → Open" to launch unnotarized — no change in what
+    Gatekeeper already required.
+  - Removed the app's own explanatory permission dialog — it's no longer
+    needed now that the real fix makes the native macOS prompt appear.
+
+## 1.14.1 — 2026-09-01
+- **Fix:** the progress pie kept spinning forever after Stop (mid-render)
+  and after a failed/partial Trash operation. Its spin animation only
+  ever stopped when a caller explicitly set value to 0 — neither of
+  those two paths did that, so it just kept rotating indefinitely with
+  no operation actually running behind it. Added a proper
+  `stop_spinning()` that freezes the pie at its current value (instead
+  of misleadingly resetting it to empty) and wired it into both paths.
+
+## 1.14.0 — 2026-09-01
+- **Fix:** Move to Trash ran synchronously on the main thread. Finder's
+  AppleScript delete is genuinely slow at scale (~1s per 30 files) —
+  for a large selection (thousands of files, chunked 100 at a time)
+  this blocked the UI for minutes with a single static "Moving files…"
+  message the whole time. Looked exactly like a hang. Now runs in the
+  background with live "Moving X of Y files…" progress, matching how
+  scanning already works; a failure partway through still correctly
+  keeps whatever succeeded before it.
+- "Move Selected to Trash" renamed to **Delete** (button and Edit menu).
+
+## 1.13.9 — 2026-09-01
+- Add Folder's Finder window no longer tries to force a size via
+  AppleScript `set bounds` (it didn't reliably stick — Finder kept
+  using its own last-remembered window size regardless). Simplified
+  to the same plain `open` call used elsewhere in the app; whatever
+  size Finder opens at is just normal Finder behavior.
+
+## 1.13.8 — 2026-09-01
+- Add Folder's Finder window is now medium-sized (600×450) instead of
+  900×700 — the oversized window looked like something had crashed
+  rather than a window quietly waiting for a drag.
+
+## 1.13.7 — 2026-09-01
+- **Fix:** a large scan (thousands of duplicate groups) rendered every
+  page of results immediately instead of only the ones you'd scrolled
+  to — a regression from 1.13.5's page-boundary fix that made rendering
+  slow again exactly for the libraries that most needed it fast. Pages
+  beyond the first now load only when you actually scroll near the
+  bottom, like before.
+- **Fix:** "Move Selected to Trash" showed a raw Finder-automation
+  error when macOS blocked the request (permission not granted, or
+  denied earlier). Now detects that specific failure and shows an
+  actionable dialog with a button straight to System Settings →
+  Privacy & Security → Automation.
+- **Add Folder** now opens a large Finder window instead of Tk's
+  picker (which can only select one folder per dialog on any
+  platform). Select multiple folders in Finder with ⌘-click and drag
+  them onto the folder list — status bar shows the instructions.
+
+## 1.13.6 — 2026-09-01
+- **Fix:** progress pie rendered blank/gray at exactly 100% instead of
+  full green — Tk's `create_arc` silently draws nothing for an exact
+  360° extent. Now draws a full circle instead of a degenerate arc.
+- **Fix:** exact-duplicate mode had no status message between "Analyzed
+  N images…" finishing and results rendering starting — on a large
+  library this was a silent gap (worse combined with the pie bug above).
+  Added "Comparing N files…" and "Reading image details…" status updates.
+- **Fix:** Clear Cache (toolbar) required confirming a modal dialog with
+  no strong visual cue, which read as the click doing nothing. Cache
+  clearing is fully safe (just triggers a re-hash later), so it now
+  clears instantly like the Preferences window's Clear Cache already did.
+  Both buttons already disable themselves when the cache is empty.
+- Add Folder now loops the picker after each pick instead of closing
+  after one — Tk's directory chooser has no native multi-select on any
+  platform, so this is the standard workaround. Cancel ends the run.
+
+## 1.13.5 — 2026-09-01
+- **Fix:** on libraries with more than 40 groups (results are paginated
+  40 at a time), the progress pie and "Processing X of Y groups…" text
+  reset at every page boundary instead of tracking the true total. On a
+  library with hundreds/thousands of groups this meant the pie appeared
+  to freeze dozens of times per scan while the count kept climbing —
+  looked exactly like a hang. Progress now tracks the real total across
+  every page.
+
+## 1.13.4 — 2026-09-01
+- **Fix:** scans could appear to hang partway through and stop responding
+  to clicks on real photo libraries. Two causes removed:
+  - The "Worker threads" preference is gone. Thread count is now sized
+    automatically from CPU cores and system memory (capped at 64) — the
+    old slider could reach 1,280 real OS threads at its max setting
+    (128 × the 10x multiplier added in 1.13.1), and that many threads is
+    pure scheduling overhead for CPU-bound hashing work
+  - The progress bar/status label update was replaying every queued
+    "processed 1 file" message as its own widget redraw. A big library
+    could queue thousands of these between UI ticks, so the main thread
+    spent long stretches redrawing instead of handling clicks. Now the
+    whole queue drains per tick and only the latest value is applied
+- Pie progress indicator is green instead of blue, and stays full/green
+  when a scan finishes (including "no duplicates found") instead of
+  resetting to empty
+- README: macOS 10.13+ requirement, Homebrew-not-required clarification
+
 ## 1.13.3 — 2026-08-18
+- Native macOS menu bar (File/Edit/Help) with in-app Help window
+- Uninstall wired into the File menu
+- build.sh stamps version into Info.plist; DMG name reads __version__
 - Matte black "Add folders here" placeholder in the folder list when empty
 - D&D white overlay now shows "Drop folders here" text
 - Placeholder auto-hides when folders are added, reappears when all removed

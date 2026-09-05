@@ -41,7 +41,9 @@ Optional drag-and-drop from Finder: `python3 -m pip install tkinterdnd2`
   can be deleted), **Reference** (files are protected, never deleted), or
   **Off** (excluded from scans entirely). Double-click a row to cycle.
 - **Drag & drop** — drop folders (or files, whose parent folder is added)
-  from Finder onto the folder list
+  from Finder onto the folder list. "+ Add Folder…" opens a Finder window
+  for this too — select several folders at once with ⌘-click and drag them
+  all in (Tk's picker can only choose one folder per dialog)
 - **Quick Look & Compare** — click any thumbnail for macOS Quick Look
   preview; each group's *Compare* button opens a side-by-side window with
   larger images, metadata, and the keeper highlighted
@@ -84,17 +86,31 @@ Stored in `~/Library/Application Support/DupeDemon/preferences.json`.
 | Subfolders / hidden files / symlinks | Controls the folder walk |
 | Minimum file size | Skip icons and thumbnails |
 | File types | Comma-separated extension list |
-| Worker threads | Performance tuning (each worker spawns 10 threads) |
 | Thumbnail size | Display tuning |
 | Use hash cache | Persists hashes so re-scans skip unchanged files; Clear Cache button included |
 | Clear cache on exit | Wipes the hash cache when the app closes (default on) |
 
 > First time you move files to the Trash, macOS asks permission for the app to
-> control Finder — click **OK**.
+> control Finder — click **Allow**. If that permission was ever denied, fix
+> it in System Settings → Privacy & Security → Automation → Dupe Demon →
+> Finder.
 >
 > At launch, Dupe Demon checks for **Full Disk Access** — without it, the shell
 > box can't see protected folders like `~/.Trash` (commands there fail
 > silently). The prompt can open the right System Settings pane for you.
+
+## Plugins
+
+Dupe Demon supports drop-in plugins without touching core functionality.
+A plugin is a single `.py` file placed in
+`~/Library/Application Support/DupeDemon/plugins/` that exports a
+`register(app)` function; it loads automatically the next time you launch.
+
+**Plugins → Manage Plugins…** lists every installed plugin with a
+description and an enable/disable toggle. Disabling a plugin persists
+immediately and takes effect on the next launch — its code is never even
+imported while disabled. Official plugins ship through pull requests to
+this repo rather than being written ad-hoc.
 
 ## Privacy
 
@@ -105,6 +121,8 @@ telemetry, and uploads nothing. All data stays on your Mac:
 |---|---|---|
 | Preferences | `~/Library/Application Support/DupeDemon/preferences.json` | Delete the file, or use the built-in uninstaller |
 | Hash cache | `~/Library/Application Support/DupeDemon/hash_cache.db` | Clear Cache button, or enable "Clear cache on exit" |
+| Installed plugins | `~/Library/Application Support/DupeDemon/plugins/` | Delete individual files, or the folder |
+| Plugin enable/disable state | `~/Library/Application Support/DupeDemon/plugin_state.json` | Delete the file, or use the built-in uninstaller |
 | Window state | macOS Saved Application State | Reset via System Settings or the uninstaller |
 
 The built-in uninstaller (Preferences → *Uninstall Dupe Demon…*) removes everything in one step.

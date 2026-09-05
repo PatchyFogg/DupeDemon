@@ -73,6 +73,17 @@ echo "==> PyInstaller"
 rm -rf build dist
 $PY -m PyInstaller --noconfirm "Dupe Demon.spec"
 
+echo "==> strip ad-hoc signature"
+# PyInstaller ad-hoc signs by default, and that signature's hash changes on
+# every rebuild (no paid Developer ID here). macOS TCC ties Automation
+# grants to that hash — after enough rebuilds under active development, TCC
+# can end up in a state where it won't even show the permission prompt for
+# the bundle ID anymore (not denied, just never asked). Fully unsigned
+# doesn't hit this; Gatekeeper's already-required "right-click > Open" for
+# an unnotarized app covers the same "did the user mean to run this"
+# check, so there's no security downside here.
+codesign --remove-signature "dist/$APP.app" 2>/dev/null || true
+
 echo "==> stamp version"
 PLIST="dist/$APP.app/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$PLIST"
